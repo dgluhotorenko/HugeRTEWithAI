@@ -16,7 +16,7 @@
 <body>
     <div class="container">
         <h1>HugeRTE + AI Assistant</h1>
-        <p class="subtitle">Select text and use the AI Assistant button in the toolbar to enhance your writing.</p>
+        <p class="subtitle">Enhance your writing with the AI Assistant, dictate with the microphone (ElevenLabs Speech-to-Text), or have your text read aloud (ElevenLabs Text-to-Speech).</p>
         <div class="editor-wrapper">
             <textarea class="editor"><p>The quick brown fox jumps over the lazy dog. This is a sample text that you can edit, select, and process with the AI assistant. Try selecting some text and clicking the AI Assistant button in the toolbar above.</p></textarea>
         </div>
@@ -29,7 +29,7 @@
             menubar: false,
             height: 400,
             plugins: ['lists', 'link', 'charmap'],
-            toolbar: 'undo redo | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | ai_assistant',
+            toolbar: 'undo redo | bold italic underline | bullist numlist | alignleft aligncenter alignright | link | ai_assistant ai_dictate ai_speak',
             external_plugins: {
                 ai_assistant: '/plugins/ai-assistant/plugin.js'
             },

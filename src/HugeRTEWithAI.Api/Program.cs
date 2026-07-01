@@ -6,6 +6,17 @@ using OpenAI.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// ElevenLabs (Text-to-Speech + Speech-to-Text)
+builder.Services.Configure<ElevenLabsOptions>(builder.Configuration.GetSection(ElevenLabsOptions.SectionName));
+builder.Services.AddHttpClient<IElevenLabsService, ElevenLabsService>((sp, client) =>
+{
+    var options = sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<ElevenLabsOptions>>().Value;
+    client.BaseAddress = new Uri("https://api.elevenlabs.io/");
+    client.Timeout = TimeSpan.FromMinutes(2);
+    if (!string.IsNullOrWhiteSpace(options.ApiKey))
+        client.DefaultRequestHeaders.Add("xi-api-key", options.ApiKey);
+});
+
 // Azure OpenAI client
 builder.Services.AddSingleton<ChatClient>(sp =>
 {
@@ -52,5 +63,72 @@ app.MapPost("/api/process", async (TextProcessingRequest request, IAiTextService
         return Results.Problem("An error occurred while processing your request.");
     }
 });
+
+// GET /api/voices — list voices for the editor's voice picker
+app.MapGet("/api/voices", async (IElevenLabsService service, ILogger<Program> logger, CancellationToken ct) =>
+{
+    try
+    {
+        var voices = await service.GetVoicesAsync(ct);
+        return Results.Ok(voices);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error fetching voices");
+        return Results.Problem("An error occurred while fetching voices.");
+    }
+});
+
+// POST /api/tts — synthesize speech, returns MP3 audio
+app.MapPost("/api/tts", async (TextToSpeechRequest request, IElevenLabsService service, ILogger<Program> logger, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Text))
+        return Results.BadRequest(new ErrorResponse { Error = "Text is required." });
+
+    if (request.Text.Length > 5_000)
+        return Results.BadRequest(new ErrorResponse { Error = "Text is too long. Maximum 5,000 characters." });
+
+    try
+    {
+        var audio = await service.TextToSpeechAsync(request.Text, request.VoiceId, ct);
+        return Results.File(audio, "audio/mpeg");
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error synthesizing speech");
+        return Results.Problem("An error occurred while synthesizing speech.");
+    }
+});
+
+// POST /api/stt — transcribe an uploaded audio recording to text
+app.MapPost("/api/stt", async (IFormFile file, IElevenLabsService service, ILogger<Program> logger, CancellationToken ct) =>
+{
+    if (file is null || file.Length == 0)
+        return Results.BadRequest(new ErrorResponse { Error = "Audio file is required." });
+
+    try
+    {
+        await using var stream = file.OpenReadStream();
+        var result = await service.SpeechToTextAsync(stream, file.FileName, file.ContentType, ct);
+        return Results.Ok(result);
+    }
+    catch (InvalidOperationException ex)
+    {
+        return Results.Problem(ex.Message, statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error transcribing audio");
+        return Results.Problem("An error occurred while transcribing audio.");
+    }
+}).DisableAntiforgery();
 
 app.Run();
