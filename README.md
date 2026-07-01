@@ -1,4 +1,4 @@
-# HugeRTE + AI Assistant
+# HugeRTE + AI Assistant & ElevenLabs Voice
 
 A rich text editor with AI-powered writing tools and voice. Built with [HugeRTE](https://hugerte.org/), Azure OpenAI, and [ElevenLabs](https://elevenlabs.io/).
 
@@ -24,8 +24,8 @@ Select text (or process the entire editor content), pick an action, review the A
 
 | Tool | Description |
 |------|-------------|
-| 🎤 **Dictate** | Records from your microphone and transcribes speech to text (ElevenLabs Scribe), inserting it at the cursor |
-| 🔊 **Read aloud** | Reads the selection or the whole document out loud (ElevenLabs Text-to-Speech), with a voice picker populated from your account |
+| 🎤 **Dictate** | Records from your microphone and transcribes speech to text ([ElevenLabs Scribe](https://elevenlabs.io/speech-to-text)), inserting it at the cursor |
+| 🔊 **Read aloud** | Reads the selection or the whole document out loud ([ElevenLabs Text-to-Speech](https://elevenlabs.io/text-to-speech)), with a voice picker populated from your account |
 
 #### Demo
 
@@ -33,14 +33,14 @@ The clip below is a silent screen capture — watch the Chrome tab indicators: t
 
 https://github.com/user-attachments/assets/30ea67b7-8604-45ee-ac33-7467e1e54523
 
-> **Note on transcription accuracy.** ElevenLabs Scribe is highly accurate, but results depend on microphone quality and background noise. Scribe can also tag non-speech audio events (e.g. `(music)`, `(laughter)`); since this app is used for dictation, that tagging is disabled (`tag_audio_events=false`) so the output stays clean text.
+> **Note on transcription accuracy.** [ElevenLabs Scribe](https://elevenlabs.io/speech-to-text) is highly accurate, but results depend on microphone quality and background noise. Scribe can also tag non-speech audio events (e.g. `(music)`, `(laughter)`); since this app is used for dictation, that tagging is disabled (`tag_audio_events=false`) so the output stays clean text.
 
 ## Tech Stack
 
 - **Backend:** .NET 10 Minimal API
 - **Frontend:** Vanilla HTML + [HugeRTE](https://hugerte.org/) (via CDN)
 - **AI:** Azure OpenAI (GPT-4o-mini)
-- **Voice:** ElevenLabs Text-to-Speech + Speech-to-Text (Scribe)
+- **Voice:** ElevenLabs [Text-to-Speech](https://elevenlabs.io/text-to-speech) + [Speech-to-Text](https://elevenlabs.io/speech-to-text) (Scribe)
 
 ## Getting Started
 
